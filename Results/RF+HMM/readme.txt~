@@ -1,0 +1,9 @@
+Feature Sets:
+
+F1: First paragraph commented out (Except for the mean).
+F2: Like F1 but Fourier feature are removed as well.
+F3: Like F1 but histogram removed.
+F4: Like F1 but histogram and normalized cross products are removed.
+F5: Everything removed except mean, moments, moments of diff, overall mean, and cross products (second block only).
+F6: Like F5 but the moments (of the signal) are removed as well.
+*: Fourier computation method changed.
