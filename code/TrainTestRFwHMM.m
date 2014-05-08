@@ -54,7 +54,7 @@ StateCodes(:,2) = num2cell(1:length(uniqStates)); %sorted by unique
 
 %% TRAIN RF with standard parameters and save results 
 disp('RF Train');
-ntrees = 400;
+ntrees = 100;
 RFmodel = TreeBagger(ntrees,features,codesTrue', 'OOBVarImp', 'off');
 
 [codesRF,P_RF] = predict(RFmodel,features);
