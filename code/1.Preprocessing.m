@@ -4,7 +4,10 @@
 %       same time
 %       Added classifierDataCreate to the end
 
-clc; clear all; close all;
+clc; 
+clear all; 
+close all;
+
 cleanup; % deletes temporary clip and feature files from previous simulations
 
 run_mode = 'train';
