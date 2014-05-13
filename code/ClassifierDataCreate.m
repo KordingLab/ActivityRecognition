@@ -6,7 +6,7 @@
 clear all;
 close all;
 
-run_mode = 'train';
+run_mode = 'test';
 
 addpath([pwd '/sub']); %create path to helper scripts
 tempDir = ['~/Dropbox/Data/temp/'];
