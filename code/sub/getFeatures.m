@@ -1,6 +1,6 @@
 function [fvec flab feature_set] = getFeatures(pre_acc, probe)
 
-feature_set = 'F3.1';
+feature_set = 'F0';
 
 S = pre_acc(2:end,:);
 time = pre_acc(1,:);
@@ -20,23 +20,22 @@ else
     % features for each of the three channels
     for i=1:size(S,1)
         % looking at separate timescales
-%         S5 = conv(S(i,:),gausswin(5)/nansum(gausswin(5)));
-%         S10 = conv(S(i,:),gausswin(10)/nansum(gausswin(10)));
-%         fvec = [fvec sqrt(nanmean(S5(:).^2))]; flab = [flab; '5 smooth rms'];
-%         fvec = [fvec sqrt(nanmean(S10(:).^2))]; flab = [flab; '10 smooth rms'];
+        S5 = conv(S(i,:),gausswin(5)/nansum(gausswin(5)));
+        S10 = conv(S(i,:),gausswin(10)/nansum(gausswin(10)));
+        fvec = [fvec sqrt(nanmean(S5(:).^2))]; flab = [flab; '5 smooth rms'];
+        fvec = [fvec sqrt(nanmean(S10(:).^2))]; flab = [flab; '10 smooth rms'];
         fvec = [fvec nanmean(S(i,:))]; flab = [flab; [probe ' ' axes{i} ' mean']]; % To be kept
-%         fvec = [fvec abs(nanmean(S(i,:)))]; flab = [flab; 'abs mean acc'];
-%         fvec = [fvec sqrt(nanmean(S(i,:).^2))]; flab = [flab; 'rms'];
-%         fvec = [fvec nanmax(S(i,:))];  flab = [flab; 'max'];
-%         fvec = [fvec nanmin(S(i,:))];  flab = [flab; 'min'];
-%         fvec = [fvec abs(nanmax(S(i,:)))];  flab = [flab; 'abs max'];
-%         fvec = [fvec abs(nanmin(S(i,:)))];  flab = [flab; 'abs min'];
+        fvec = [fvec abs(nanmean(S(i,:)))]; flab = [flab; 'abs mean acc'];
+        fvec = [fvec sqrt(nanmean(S(i,:).^2))]; flab = [flab; 'rms'];
+        fvec = [fvec nanmax(S(i,:))];  flab = [flab; 'max'];
+        fvec = [fvec nanmin(S(i,:))];  flab = [flab; 'min'];
+        fvec = [fvec abs(nanmax(S(i,:)))];  flab = [flab; 'abs max'];
+        fvec = [fvec abs(nanmin(S(i,:)))];  flab = [flab; 'abs min'];
         
         % normalized histogram of the values
-%         histvec = histc((S(i,:)-nanmean(S(i,:))/nanstd(S(i,:))),[-3:1:3]);
-        % remove the last data point (which is zero in almost all cases)
-        %     histvec = histvec(1:end-1);
-%         fvec = [fvec histvec]; flab = [flab; cellstr(repmat('hist',7,1))];
+        histvec = histc((S(i,:)-nanmean(S(i,:))/nanstd(S(i,:))),[-3:1:3]);
+        histvec = histvec(1:end-1); % remove the last data point (which is zero in almost all cases)
+        fvec = [fvec histvec]; flab = [flab; cellstr(repmat('hist',length(histvec),1))];
         
         % 2nd, 3rd, 4th moments
         fvec = [fvec nanstd(S(i,:))];  flab = [flab; [probe ' ' axes{i} ' std']];
@@ -48,7 +47,7 @@ else
         % then getting the first 8 coefficients, it was doing FFT only on the
         % first 16 samples of the signal and then getting the first 8
         % coefficients.
-        Y = abs(fft(S(i,:), 4*50)); % average sampling rate is about 50Hz and the window size is 4s
+        Y = abs(fft(S(i,:), 4*100)); % average sampling rate is about 100Hz and the window size is 4s
         Y = Y/sqrt(sum(Y.^2));
         Y = Y(1:end/2);
         Y = decimate(Y,2);
@@ -71,13 +70,13 @@ else
     fvec = [fvec nanmean(nanmean(S.^2))]; flab = [flab; [probe ' overall mean']];
     
     % for quasi angles
-%     S2=S/sqrt(nansum(S.^2));
-%     fvec = [fvec nanmean(S2(1,:).*S2(2,:))]; flab = [flab; 'cross prod 1'];
-%     fvec = [fvec nanmean(S2(1,:).*S2(3,:))]; flab = [flab; 'cross prod 2'];
-%     fvec = [fvec nanmean(S2(2,:).*S2(3,:))]; flab = [flab; 'cross prod 3'];
-%     fvec = [fvec abs(nanmean(S2(1,:).*S2(2,:)))]; flab = [flab; 'ABS cross prod 1'];
-%     fvec = [fvec abs(nanmean(S2(1,:).*S2(3,:)))]; flab = [flab; 'ABS cross prod 2'];
-%     fvec = [fvec abs(nanmean(S2(2,:).*S2(3,:)))]; flab = [flab; 'ABS cross prod 3'];
+    S2=S/sqrt(nansum(S.^2));
+    fvec = [fvec nanmean(S2(1,:).*S2(2,:))]; flab = [flab; 'cross prod 1'];
+    fvec = [fvec nanmean(S2(1,:).*S2(3,:))]; flab = [flab; 'cross prod 2'];
+    fvec = [fvec nanmean(S2(2,:).*S2(3,:))]; flab = [flab; 'cross prod 3'];
+    fvec = [fvec abs(nanmean(S2(1,:).*S2(2,:)))]; flab = [flab; 'ABS cross prod 1'];
+    fvec = [fvec abs(nanmean(S2(1,:).*S2(3,:)))]; flab = [flab; 'ABS cross prod 2'];
+    fvec = [fvec abs(nanmean(S2(2,:).*S2(3,:)))]; flab = [flab; 'ABS cross prod 3'];
     
     % cross products - only for 3axes sensors:
     fvec = [fvec nanmean(S(1,:).*S(2,:))]; flab = [flab; [probe ' cross prod']];

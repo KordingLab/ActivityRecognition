@@ -18,7 +18,7 @@ probes = {'acc','bar'};
 
 currentDir = pwd;
 addpath([pwd '/sub']); %create path to helper scripts
-dataDir = ['~/Dropbox/Data/Cornell_adapted/'];
+dataDir = ['~/Dropbox/Data/Cornell_adapted/raw/'];
 tempDir = ['~/Dropbox/Data/temp/'];
 trainingFeatureDir = [tempDir 'features/'];
 clipDir = [tempDir 'clips/'];

@@ -1,6 +1,6 @@
 %% deletes temporary clip and feature files from previous simulations
 
-delete('~/Dropbox/Data/ActivityRecognition/clips/*.mat');
-delete('~/Dropbox/Data/ActivityRecognition/clipsPatient/*.mat');
-delete('~/Dropbox/Data/ActivityRecognition/features/*.mat');
-delete('~/Dropbox/Data/ActivityRecognition/featuresPatient/*.mat');
+delete('~/Dropbox/Data/temp/clips/*.mat');
+delete('~/Dropbox/Data/temp/clipsPatient/*.mat');
+delete('~/Dropbox/Data/temp/features/*.mat');
+delete('~/Dropbox/Data/temp/featuresPatient/*.mat');

@@ -1,12 +1,12 @@
 %% CLASSIFIER DATA CREATE
 % This program combines all feature files ending with _c.mat (presumably
 % training data features) into 'train_data.mat' and files ending with _t.mat
-% (presumably test data features) into 'test_data.mat'.
+% (test data features) into 'test_data.mat'.
 
 clear all;
 close all;
 
-run_mode = 'test';
+run_mode = 'train';
 
 addpath([pwd '/sub']); %create path to helper scripts
 tempDir = ['~/Dropbox/Data/temp/'];
