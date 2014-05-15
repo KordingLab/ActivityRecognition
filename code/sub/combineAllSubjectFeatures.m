@@ -14,8 +14,6 @@ end
 
 files = dir([featureDir '/*' fltr]);
 
-files
-
 features = [];
 activity = [];
 wearing = [];

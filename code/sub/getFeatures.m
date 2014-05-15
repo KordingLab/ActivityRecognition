@@ -1,9 +1,9 @@
-function [fvec flab feature_set] = getFeatures(pre_acc, probe)
+function [fvec flab feature_set] = getFeatures(data, probe)
 
 feature_set = 'F0';
 
-S = pre_acc(2:end,:);
-time = pre_acc(1,:);
+S = data(2:end,:);
+time = data(1,:);
 
 fvec = [];
 flab = {};
@@ -13,7 +13,10 @@ axes = {'x','y','z'};
 if size(S,1)==1,
     
     fvec = [fvec S(1,end)-S(1,1)]; flab = [flab; [probe ' end-begin']];
-    fvec = [fvec nanmean(diff(S(1,:))./diff(time))]; flab = [flab; [probe ' avg derivative']];
+    fvec = [fvec nanmean(diff(S(1,:)))/nanmean(diff(time))]; flab = [flab; [probe ' avg derivative']];
+    if isinf(nanmean(diff(S(1,:)))/nanmean(diff(time))),
+        disp('Warning: Barometer feature extraction generates infinity values!');
+    end
 
 else
 

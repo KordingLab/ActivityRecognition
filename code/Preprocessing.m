@@ -1,8 +1,7 @@
 %% CREATE CLIPS AND GET FEATURES
-% V2:   Overlap option added to the getTestClips function
-% V3:   Uses getTestClips_v3 which extract clips from multiple probes at the
-%       same time
-%       Added classifierDataCreate to the end
+% Modifications:
+% The new version of getTestClips() extracts clips from multiple probes at the same time
+% overlap option is also now available for getTestClips()
 
 clc; 
 clear all; 
@@ -10,11 +9,13 @@ close all;
 
 cleanup; % deletes temporary clip and feature files from previous simulations
 
+% Run Mode:
+% train: only use directories ending with '_c' for feature extraction
+% test: only use directories ending with '_t' for feature extraction
 run_mode = 'train';
-% run_mode = 'test';
 
 % probes = {'acc','gyr','lac','rot','mag'};    % probes to be used
-probes = {'acc','bar'};
+probes = {'acc','bar','gyr'};
 
 currentDir = pwd;
 addpath([pwd '/sub']); %create path to helper scripts

@@ -1,7 +1,7 @@
 %% TRAIN RF AND HMM ON SEPARATE DATASETS
 
 % MATLAB's toolbox is used for RF
-% pmtk3 package is used for HMM
+% MATLAB's toolbox is used for HMM
 
 clc; clear all; close all;             
 
@@ -60,41 +60,11 @@ disp('HMM Train...');
 %load the transition matrix
 % transitionFile = 'A_6Activity.xls';
 transitionFile = 'A_8Activity.xls';
-% fprintf('HMM: Setting transition matrix according to %s\n', transitionFile);
+fprintf('HMM: Setting transition matrix according to %s\n', transitionFile);
 A = xlsread(transitionFile);
-% 
-% %inialize parameters for hmm
-% d       = length(uniqStates);   %number of symbols (=#states)
-% nstates = d;                    %number of states
-% mu      = zeros(d,nstates);     %mean of emission distribution
-% sigma   = zeros(d,1,nstates);   %std dev of emission distribution
-% Pi      = ones(length(uniqStates),1) ./ length(uniqStates); %uniform prior
-% sigmaC  = .1;                   %use a constant std dev
-% 
-% %create emission probabilities for HMM
-% % PBins  = cell(d,1);
-% 
-% %for each type of state we need a distribution
-% for bin = 1:d
-%     clipInd         = strcmp(uniqStates{bin},statesTrue);
-% %     PBins{bin,1}    = P_RF(clipInd,:); %The Emission Probabilities of the HMM are the RF output prob on the train dataset
-%     mu(:,bin)       = mean(P_RF(clipInd,:)); % training for means: setting emission dist. means to the means of probabilities given by RF
-%     sigma(:,:,bin)  = sigmaC; % no training for std
-% end
-% 
-% %set the parameters for pmtk3 package
-% emission        = struct('Sigma',[],'mu',[],'d',[]);
-% emission.Sigma  = sigma;
-% emission.mu     = mu;
-% emission.d      = d;
-% 
-% %construct HMM using pmtk3 package
-% HMMmodel           = hmmCreate('gauss',Pi,A,emission);
-% % what are the following two lines doing?
-% HMMmodel.emission  = condGaussCpdCreate(emission.mu,emission.Sigma);
-% HMMmodel.fitType   = 'gauss';
 
-[TR, EM] = hmmestimate(codesRF, codesTrue);
+% training HMM on train data
+% [TR, EM] = hmmestimate(codesRF, codesTrue);
 
 %% TEST ON THE UNLABELED DATASET
 clear trainingClassifierData cData features;
@@ -117,15 +87,14 @@ statesRF = uniqStates(codesRF); %predicted states by the RF
 
 %% predict the states using the HMM
 disp('Predict activites with HMM');
-% [gamma, ~, ~, ~, ~]   = hmmInferNodes(HMMmodel, P_RF');
-% [statesHmm, codesHmm] = getPredictedStates(gamma',uniqStates);
 
-% TR(TR==0) = eps;
+% discarding the trained transition and emission matrices, and using
+% hand-crafted ones (basically, using the HMM as an LPF)
 TR = A;
 EM = (eye(8,8)*(.5-.5/7)) + .5/7;
 codesHmm = hmmviterbi(codesRF, TR, EM);
 
-%% PLOT PREDICTED AND ACTUAL STATES
+%% VISUALIZATION
 
 time_Res = 1;      %TO BE INCLUDED IN ClassifierData structure
 t = 0:time_Res:time_Res*(length(codesHmm)-1);
@@ -150,19 +119,19 @@ plot(t,codesHmm,'.-b');
 xlabel('Time elapsed');
 set(gca,'YTick',unique(codesRF));
 set(gca,'YTickLabel',StateCodes(unique(codesRF),1));
-legend('RF','HMM');
+legend('True','RF','HMM');
 axis tight;
 
 subplot 313; hold on;
-plot(t/60,max(gamma));   %plot Max posterior for the class (HMM)
+% plot(t/60,max(gamma));   %plot Max posterior for the class (HMM)
 plot(t/60,max(P_RF,[],2),'r');   %plot Max posterior for the class (RF)
-legend('HMM','RF');
+% legend('HMM','RF');
 axis tight;
 
 %Display % of each activity over all predictions  
 Activity_Percentage = StateCodes;
 for i = 1:size(StateCodes,1)
-    ind = strcmp(statesHmm, Activity_Percentage{i,1});
+    ind = strcmp(uniqStates(codesHmm), Activity_Percentage{i,1});
     Activity_Percentage{i,2} = sum(ind)./size(ind,1);
 end
 h=figure;
@@ -236,7 +205,7 @@ for i=unique(codesTrue),
     fprintf('F1 score = %.2f\n', 2*prec(k)*rec(k)/(prec(k)+rec(k)));
 end
 fprintf('Overall:\n');
-fprintf('   Accuracy = %.2f\n', sum(codesHmm==codesTrue')/length(codesTrue));
+fprintf('   Accuracy = %.2f\n', sum(codesHmm==codesTrue)/length(codesTrue));
 fprintf('   Avg Class Accuracy = %.2f\n', mean(acc));
 fprintf('   Precision = %.2f\n', mean(prec));
 fprintf('   Recall = %.2f\n', mean(rec));
