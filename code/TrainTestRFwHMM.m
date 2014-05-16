@@ -1,4 +1,4 @@
-%% TRAIN RF AND HMM ON SEPARATE DATASETS
+%% TRAIN AND TEST RF+HMM ON SEPARATE DATASETS
 
 % MATLAB's toolbox is used for RF
 % MATLAB's toolbox is used for HMM
@@ -18,9 +18,6 @@ load('train_data');
 %Clip threshold options
 clipThresh = 0.8; %to be in training set, clips must have >X% of label
 
-% statistical normalization
-trainingClassifierData.features = scaleFeatures(trainingClassifierData.features);
-
 %remove any clips that don't meet the training set threshold
 [trainingClassifierData, removeInd] = removeDataWithActivityFraction(trainingClassifierData,clipThresh);
 
@@ -31,19 +28,22 @@ uniqStates  = unique(statesTrue);
 
 %How many clips of each activity type we removed
 for i = 1:length(uniqStates),
-    indr = find(strcmp(trainingClassifierData.activity(removeInd),uniqStates(i)));
-    indtot = find(strcmp(trainingClassifierData.activity,uniqStates(i)));
+    indr = find(strcmp(statesTrue(removeInd), uniqStates(i)));
+    indtot = find(strcmp(statesTrue, uniqStates(i)));
     removed = length(indr)/length(indtot)*100;
     disp([num2str(removed) ' % of ' uniqStates{i} ' data removed'])
 end
 
+% statistical normalization
+features = scaleFeatures(features);
+
 %get codes for the true states (i.e. make a number code for each state)
-%and save code and state
 codesTrue = zeros(1,length(statesTrue));
 for i = 1:length(statesTrue)
-    codesTrue(i) = find(strcmp(statesTrue{i},uniqStates));
+    codesTrue(i) = find(strcmp(statesTrue{i}, uniqStates));
 end
-%Store Code and label of each unique State
+
+%Store code and label of each unique State
 StateCodes = cell(length(uniqStates),2);
 StateCodes(:,1) = uniqStates;
 StateCodes(:,2) = num2cell(1:length(uniqStates)); %sorted by unique
@@ -121,6 +121,7 @@ set(gca,'YTick',unique(codesRF));
 set(gca,'YTickLabel',StateCodes(unique(codesRF),1));
 legend('True','RF','HMM');
 axis tight;
+grid on;
 
 subplot 313; hold on;
 % plot(t/60,max(gamma));   %plot Max posterior for the class (HMM)

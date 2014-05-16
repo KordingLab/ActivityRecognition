@@ -2,8 +2,24 @@ function [fvec flab feature_set] = getFeatures(data, probe)
 
 feature_set = 'F0';
 
-S = data(2:end,:);
-time = data(1,:);
+% we do interpolation here to make a consistant number of datapoints
+secs = 4;
+rate = 50;
+arr_size = round(secs*rate);
+start_sec = data(1,1);
+data_int = zeros([size(data,1), arr_size]);
+data_int(1,:) = start_sec + ([0:arr_size-1]' / arr_size * secs);
+
+% removing samplees with identical timestamps
+fprintf('getFeatures: Warning: %d samples with identical timestamps found and removed.\n', sum(diff(data(1,:))==0));
+data(:,diff(data(1,:))==0) = [];
+
+for dim = 2:size(data,1),
+    data_int(dim,:) = interp1(data(1,:), data(dim,:), data_int(1,:), 'linear', 'extrap');
+end
+
+S = data_int(2:end,:);
+time = data_int(1,:);
 
 fvec = [];
 flab = {};
@@ -50,7 +66,7 @@ else
         % then getting the first 8 coefficients, it was doing FFT only on the
         % first 16 samples of the signal and then getting the first 8
         % coefficients.
-        Y = abs(fft(S(i,:), 4*100)); % average sampling rate is about 100Hz and the window size is 4s
+        Y = abs(fft(S(i,:), secs*rate)); % depending on sampling rate and window size
         Y = Y/sqrt(sum(Y.^2));
         Y = Y(1:end/2);
         Y = decimate(Y,2);
