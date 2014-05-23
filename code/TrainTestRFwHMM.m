@@ -3,13 +3,13 @@
 % MATLAB's toolbox is used for RF
 % MATLAB's toolbox is used for HMM
 
-clc; clear all; close all;             
+clc; clear all; close all;
 
 tic;
 
-ntrees = 400;
+ntrees = 400;   %number of trees for Random Forest
 
-addpath([pwd '/sub']); %create path to helper scripts
+addpath([pwd '/sub']); %Add path to helper scripts
 
 %% INIT
 %Load Train data
@@ -18,15 +18,15 @@ load('train_data');
 %Clip threshold options
 clipThresh = 0.8; %to be in training set, clips must have >X% of label
 
-%remove any clips that don't meet the training set threshold
+% remove any clips that don't meet the training set threshold
 [trainingClassifierData, removeInd] = removeDataWithActivityFraction(trainingClassifierData,clipThresh);
 
-%create local variables for often used data
+% create local variables for often used data
 features     = trainingClassifierData.features;
-statesTrue = trainingClassifierData.activity;   
-uniqStates  = unique(statesTrue); 
+statesTrue = trainingClassifierData.activity;
+uniqStates  = unique(statesTrue);
 
-%How many clips of each activity type we removed
+% How many clips of each activity class have we removed?
 for i = 1:length(uniqStates),
     indr = find(strcmp(statesTrue(removeInd), uniqStates(i)));
     indtot = find(strcmp(statesTrue, uniqStates(i)));
@@ -34,10 +34,10 @@ for i = 1:length(uniqStates),
     disp([num2str(removed) ' % of ' uniqStates{i} ' data removed'])
 end
 
-% statistical normalization
+%Normalization
 features = scaleFeatures(features);
 
-%get codes for the true states (i.e. make a number code for each state)
+%get codes for the true states
 codesTrue = zeros(1,length(statesTrue));
 for i = 1:length(statesTrue)
     codesTrue(i) = find(strcmp(statesTrue{i}, uniqStates));
@@ -113,7 +113,7 @@ codesTrue = zeros(1,length(activity));
 for i = 1:length(activity)
     codesTrue(i) = find(strcmp(activity{i},uniqStates));
 end
-plot(t,codesTrue,'.-g');
+plot(t,codesTrue,'*g','markersize',5);
 plot(t, codesRF, '.-r');
 plot(t,codesHmm,'.-b');
 xlabel('Time elapsed');
@@ -128,6 +128,7 @@ subplot 313; hold on;
 plot(t/60,max(P_RF,[],2),'r');   %plot Max posterior for the class (RF)
 % legend('HMM','RF');
 axis tight;
+ylabel('confidence');
 
 %Display % of each activity over all predictions  
 Activity_Percentage = StateCodes;

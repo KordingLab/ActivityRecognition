@@ -67,7 +67,7 @@ for prb = 2:length(options.probes),
     end
 end
 
-class_info_file = 'class_info_cornell.xls';
+class_info_file = 'class_info_FTC.xls';
 location_info_file = 'location_info.xls';
 fprintf('getTestClips: Assigning class names according to %s\n', class_info_file);
 fprintf('getTestClips: Assigning location names according to %s\n', location_info_file);
@@ -93,7 +93,7 @@ for file = 1:length(datafiles{1}),
     startWindow = startTime - options.secs*(1-options.overlap);
     endWindow = startWindow + options.secs;
     
-    num_rows
+%     num_rows
     cnt = 0;
     
     format longg

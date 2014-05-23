@@ -15,11 +15,11 @@ cleanup; % deletes temporary clip and feature files from previous simulations
 run_mode = 'train';
 
 % probes = {'acc','gyr','lac','rot','mag'};    % probes to be used
-probes = {'acc','bar','gyr'};
+probes = {'acc'};
 
 currentDir = pwd;
 addpath([pwd '/sub']); %create path to helper scripts
-dataDir = ['~/Dropbox/Data/Cornell_adapted/raw/'];
+dataDir = ['~/Dropbox/Data/FTC/'];
 tempDir = ['~/Dropbox/Data/temp/'];
 trainingFeatureDir = [tempDir 'features/'];
 clipDir = [tempDir 'clips/'];
@@ -35,7 +35,7 @@ probes = G;
 %options for extracting clips and features
 options.secs = 4;
 options.overlap = 0.75;
-options.rate = 10;  % sampling frequency to interpolate to in getFeatures
+options.rate = 50;  % sampling frequency to interpolate to in getFeatures
 options.activity_columns = 2;   % activity+location
 options.activity_fraction = 0;
 options.forceFileRewrite = 1;
@@ -79,6 +79,8 @@ uniqueStates = {};
 
 for subject = 1:length(rawDirs)
     
+    fprintf('Extracting clips %d/%d (%d sec, %d%% overlap)...\n', subject, length(rawDirs), options.secs, options.overlap*100);
+
     %set up data directories we are going to use
     subjectDir = rawDirs{subject};
     dataFilePrefix = [dataDir subjectDir];
@@ -94,10 +96,10 @@ for subject = 1:length(rawDirs)
         date = [];
         %get the clips based on our options, for the accelerometer probe
         [values, labels, percentTimeSpent] = getTestClips(dataFilePrefix, ...
-            'secs',options.secs,...
-            'overlap',options.overlap,...
-            'activity_columns',options.activity_columns,...
-            'activity_fraction',options.activity_fraction,...
+            'secs', options.secs,...
+            'overlap', options.overlap,...
+            'activity_columns', options.activity_columns,...
+            'activity_fraction', options.activity_fraction,...
             'probes', probes);
         
         for prb = 1:length(probes),
@@ -148,12 +150,12 @@ for file = 1:length(files_all),
     end
 end
 
-for file_subj = 1:size(files,2)
+for file_subj = 1:size(files,2),
     
     filename = files{1,file_subj}; % NOTE: all probe features (acc, gyr, etc.) at the moment are saved under the name acc_*!
     filename = filename(find(files{1}=='_',1,'first')+1:end);
     
-    disp('Calculating features...')
+    fprintf('\nCalculating features %d/%d (Interpolation at %dHz)... ', file_subj, size(files,2), options.rate);
     
     %i do not use reflections on the signal, but the option is still there
     %         reflections = [1, 1, 1, 1];
@@ -190,7 +192,7 @@ for file_subj = 1:size(files,2)
             %                     refl = clip_data.values{Index}.* repmat(reflections(reflection,:)',1,len);
             %                     refl = clip_data.values{Index};
             %                     [x_vec, x_labels] = getFeatures_v2(refl, options.secs, options.rate);
-            [x_vec, x_labels, feature_set] = getFeatures(clip_data.values{Index}, probes{file_prb});
+            [x_vec, x_labels, feature_set] = getFeatures(clip_data.values{Index}, probes{file_prb}, options.secs, options.rate);
             x_data = [x_data; x_vec];
             act_labels{end+1} = clip_data.act_label{Index};
             identifier{end+1} = clip_data.identifier{1};

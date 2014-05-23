@@ -14,7 +14,7 @@ run_mode = 'train';
 
 addpath([pwd '/sub']); %create path to helper scripts
 tempDir = ['~/Dropbox/Data/temp/'];
-FeatureDir = [tempDir 'features/'];
+FeatureDir = [tempDir 'features/']; %features directory to build classifier data from
 
 classifierData = combineAllSubjectFeatures(FeatureDir, run_mode);
 classifierData = combineLocations(classifierData,'Pocket');
