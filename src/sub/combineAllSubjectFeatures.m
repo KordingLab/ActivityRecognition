@@ -2,17 +2,12 @@
 % in tran mode, only *_c.mat files are combined.
 % in test mode, only *_t.mat files are combined.
 
-function classifierData = combineAllSubjectFeatures(featureDir, run_mode)
+function classifierData = combineAllSubjectFeatures(featureDir)
 
-if strcmp(run_mode, 'train'),
-    fltr = '_c.mat';
-elseif strcmp(run_mode, 'test'),
-    fltr = '_t.mat';
-else
-    error('combineAllSubjectFeatures: Run mode unknown!');
+files = dir([featureDir '/*.mat']);
+if isempty(files),
+    error('No feature files found.');
 end
-
-files = dir([featureDir '/*' fltr]);
 
 features = [];
 activity = [];

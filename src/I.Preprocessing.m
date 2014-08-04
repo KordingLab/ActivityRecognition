@@ -12,14 +12,18 @@ cleanup; % deletes temporary clip and feature files from previous simulations
 % Run Mode:
 % train: only use directories ending with '_c' for feature extraction
 % test: only use directories ending with '_t' for feature extraction
-run_mode = 'train';
+% run_mode = 'train';
 
 % probes = {'acc','gyr','lac','rot','mag'};    % probes to be used
 probes = {'acc'};
 
 currentDir = pwd;
 addpath([pwd '/sub']); %create path to helper scripts
+
+% raw data directory
 dataDir = ['~/Dropbox/Data/FTC/'];
+% dataDir = ['/home/sohrob/Dropbox/Data/Cornell_adapted/raw/'];
+
 tempDir = ['~/Dropbox/Data/temp/'];
 trainingFeatureDir = [tempDir 'features/'];
 clipDir = [tempDir 'clips/'];
@@ -40,33 +44,39 @@ options.activity_columns = 2;   % activity+location
 options.activity_fraction = 0;
 options.forceFileRewrite = 1;
 
-patientDir = {};
-controlDir = {};
-testDir = {};
+% patientDir = {};
+% controlDir = {};
+% testDir = {};
+
+rawDirs = {};
 
 for directory = 1:length(dirList)
     dirName = dirList(directory).name;
-    %skip hidden files
+    %skip current directory
     if dirName(1) == '.'
-        continue
-    elseif strcmp(dirName(end),'p') %patient data
-        patientDir{end+1} = dirName;
-    elseif strcmp(dirName(end),'c') %control data
-        controlDir{end+1} = dirName;
-    elseif strcmp(dirName(end),'t') %test data
-        testDir{end+1} = dirName;
+        continue;
+    else
+        rawDirs{end+1} = dirName;
     end
+%     elseif strcmp(dirName(end),'p') %patient data
+%         patientDir{end+1} = dirName;
+%     elseif strcmp(dirName(end),'c') %control data
+%         controlDir{end+1} = dirName;
+%     elseif strcmp(dirName(end),'t') %test data
+%         testDir{end+1} = dirName;
+%     end
 end
 
 %Select which directories to use for feature extraction:
-if strcmp(run_mode, 'train'),
-    rawDirs = {controlDir{:}};
-elseif strcmp(run_mode, 'test'),
-    rawDirs = {testDir{:}};
-end
+% if strcmp(run_mode, 'train'),
+%     rawDirs = {controlDir{:}};
+% elseif strcmp(run_mode, 'test'),
+%     rawDirs = {testDir{:}};
+% end
 
 if isempty(rawDirs),
-    error(['No appropriate data directory found for ', run_mode, ' run mode.']);
+%     error(['No appropriate data directory found for ', run_mode, ' run mode.']);
+    error(['No data directory found.']);
 end
 
 filePathName = 'filepath';

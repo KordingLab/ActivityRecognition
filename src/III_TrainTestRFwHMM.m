@@ -7,7 +7,7 @@ clc; clear all; close all;
 
 tic;
 
-ntrees = 400;   %number of trees for Random Forest
+ntrees = 50;   %number of trees for Random Forest
 
 addpath([pwd '/sub']); %Add path to helper scripts
 
@@ -19,11 +19,11 @@ load('train_data');
 clipThresh = 0.8; %to be in training set, clips must have >X% of label
 
 % remove any clips that don't meet the training set threshold
-[trainingClassifierData, removeInd] = removeDataWithActivityFraction(trainingClassifierData,clipThresh);
+[TrainData, removeInd] = removeDataWithActivityFraction(TrainData,clipThresh);
 
 % create local variables for often used data
-features     = trainingClassifierData.features;
-statesTrue = trainingClassifierData.activity;
+features     = TrainData.features;
+statesTrue = TrainData.activity;
 uniqStates  = unique(statesTrue);
 
 % How many clips of each activity class have we removed?
@@ -73,8 +73,8 @@ clear trainingClassifierData cData features;
 load('test_data');
 
 %create local variables for often used data
-features = trainingClassifierData.features; %features for classifier
-activity = trainingClassifierData.activity;
+features = TestData.features; %features for classifier
+activity = TestData.activity;
 
 %statistical normalization
 features = scaleFeatures(features);
@@ -105,7 +105,7 @@ set(h,'position',[2416         583         791         620]);
 subplot 311; hold on;
 imagesc(t, 1:size(features,2), features');
 colormap gray;
-set(gca, 'ytick', 1:size(features,2), 'yticklabel', trainingClassifierData.featureLabels);
+set(gca, 'ytick', 1:size(features,2), 'yticklabel', TestData.featureLabels);
 axis tight;
 
 subplot 312; hold on;
@@ -125,7 +125,9 @@ grid on;
 
 subplot 313; hold on;
 % plot(t/60,max(gamma));   %plot Max posterior for the class (HMM)
-plot(t/60,max(P_RF,[],2),'r');   %plot Max posterior for the class (RF)
+post = max(P_RF,[],2);
+plot(t/60, post, 'r');   %plot Max posterior for the class (RF)
+plot(t/60, smooth(post, 100));
 % legend('HMM','RF');
 axis tight;
 ylabel('confidence');

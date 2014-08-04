@@ -8,5 +8,5 @@ classifierData.identifier(ind) = [];
 classifierData.subject(ind) = [];
 classifierData.states(ind) = [];
 classifierData.activityFrac(ind) = [];
-% disp(['Removed data with NaNs']);
+disp(['Removed data with NaNs!']);
 end

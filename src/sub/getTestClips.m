@@ -67,6 +67,8 @@ for prb = 2:length(options.probes),
     end
 end
 
+% class_info_file = 'class_info.xls';
+% class_info_file = 'class_info_cornell.xls';
 class_info_file = 'class_info_FTC.xls';
 location_info_file = 'location_info.xls';
 fprintf('getTestClips: Assigning class names according to %s\n', class_info_file);
