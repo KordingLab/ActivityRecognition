@@ -51,6 +51,7 @@ StateCodes(:,2) = num2cell(1:length(uniqStates)); %sorted by unique
 %% TRAIN RF with standard parameters
 disp(['RF Train with ' num2str(ntrees) ' trees...']);
 RFmodel = TreeBagger(ntrees, features, codesTrue', 'OOBVarImp', 'off');
+% RFmodel = fitensemble(features, codesTrue', 'AdaBoostM1', ntrees, 'Tree');
 [codesRF, P_RF] = predict(RFmodel,features);  %Only probabilities are needed to train the HMM
 codesRF = str2num(cell2mat(codesRF));
 
