@@ -15,7 +15,7 @@ cleanup; % deletes temporary clip and feature files from previous simulations
 % run_mode = 'train';
 
 % probes = {'acc','gyr','lac','rot','mag'};    % probes to be used
-probes = {'acc'};
+probes = {'acc','gyr'};
 
 currentDir = pwd;
 addpath([pwd '/sub']); %create path to helper scripts
