@@ -240,3 +240,4 @@ for file_subj = 1:size(files,2),
 end
 
   
+disp('Now go to /temp/features and sort the training and test features.');

@@ -1,6 +1,6 @@
 function [fvec flab feature_set] = getFeatures(data, probe, secs, rate)
 
-feature_set = 'F0';
+feature_set = 'F2';
 
 % Removing samples with identical timestamps
 % Ideally this should be done when preparing data (which is the case for
@@ -50,10 +50,10 @@ else
         fvec = [fvec sqrt(nanmean(S(i,:).^2))]; flab = [flab; [probe axes{i} '_rms']];
 
         % looking at separate timescales
-        S5 = conv(S(i,:),gausswin(5)/nansum(gausswin(5)));
-        S10 = conv(S(i,:),gausswin(10)/nansum(gausswin(10)));
-        fvec = [fvec sqrt(nanmean(S5(:).^2))]; flab = [flab; [probe axes{i} '_rms_smooth5']];
-        fvec = [fvec sqrt(nanmean(S10(:).^2))]; flab = [flab; [probe axes{i} '_rms_smooth10']];
+%         S5 = conv(S(i,:),gausswin(5)/nansum(gausswin(5)));
+%         S10 = conv(S(i,:),gausswin(10)/nansum(gausswin(10)));
+%         fvec = [fvec sqrt(nanmean(S5(:).^2))]; flab = [flab; [probe axes{i} '_rms_smooth5']];
+%         fvec = [fvec sqrt(nanmean(S10(:).^2))]; flab = [flab; [probe axes{i} '_rms_smooth10']];
 
         % min and max
         fvec = [fvec nanmax(S(i,:))];  flab = [flab; [probe axes{i} '_max']];
@@ -61,12 +61,15 @@ else
         fvec = [fvec abs(nanmax(S(i,:)))];  flab = [flab; [probe axes{i} '_max_abs']];
         fvec = [fvec abs(nanmin(S(i,:)))];  flab = [flab; [probe axes{i} '_min_abs']];
         
-        % normalized histogram of the values
+        %TODO
+        % add histogram of raw values
+        
+        % histogram of the z-score values
         histvec = histc((S(i,:)-nanmean(S(i,:))/nanstd(S(i,:))),[-3:1:3]);
-        histvec = histvec(1:end-1); % remove the last data point (which is zero in almost all cases)
+        histvec = histvec(1:end-1); % remove the last data point which counts how many values match exactly 3. (nonsense)
         fvec = [fvec histvec]; 
         for j=1:length(histvec),
-            flab = [flab; [probe axes{i} sprintf('_hist7_%d',j)]];
+            flab = [flab; [probe axes{i} sprintf('_hist%d',j)]];
         end
         
         % 2nd, 3rd, 4th moments
@@ -75,45 +78,50 @@ else
         fvec = [fvec kurtosis(S(i,:))]; flab = [flab; [probe axes{i} '_kurt']];
         
         % fourier transform
-        Y = abs(fft(S(i,:)));
-        Y = Y/sqrt(sum(Y.^2));
-        Y = Y(1:end/2);
-%         Y = decimate(Y,2);
-        Y = Y(1:10); % only the first 10 coefficients
-        fvec = [fvec Y];
-        for j=1:length(Y),
-            flab = [flab; [probe axes{i} sprintf('_fft_%d',j)]];
-        end
+%         Y = abs(fft(S(i,:)));
+%         Y = Y/sqrt(sum(Y.^2));
+%         Y = Y(1:end/2);
+%         Y = Y(1:10); % only the first 10 coefficients
+%         fvec = [fvec Y];
+%         for j=1:length(Y),
+%             flab = [flab; [probe axes{i} sprintf('_fft%d',j)]];
+%         end
         
         
         % moments of the difference
         fvec = [fvec sqrt(nanmean(diff(S(i,:)).^2))]; flab = [flab; [probe axes{i} '_diff_mean']];
         fvec = [fvec nanstd(diff(S(i,:)))]; flab = [flab; [probe axes{i} '_diff_std']];
         fvec = [fvec skewness(diff(S(i,:)))]; flab = [flab; [probe axes{i} '_diff_skew']];
-        fvec = [fvec kurtosis(diff(S(i,:)))]; flab = [flab; [probe axes{i} '_diff_kurtosis']];
+        fvec = [fvec kurtosis(diff(S(i,:)))]; flab = [flab; [probe axes{i} '_diff_kurt']];
         
     end
     
     % features that apply across the signals
     
-    % overall mean
+    % overall mean of sqares
     fvec = [fvec nanmean(nanmean(S.^2))]; flab = [flab; [probe '_mean']];
     
     % for quasi-angles
-    S2=S/sqrt(nansum(S.^2));
+    % NOTE: if this is meant to calculate the angles (cosine of angles)
+    % then it is doing it in a completely wrong way
+    % S2=S/sqrt(nansum(S.^2));
+    
+    % corrected:
+    S2=S./(ones(size(S,1),1)*sqrt(nansum(S.^2)));
+    
     fvec = [fvec nanmean(S2(1,:).*S2(2,:))]; flab = [flab; [probe '_cross_xy_norm']];
-    fvec = [fvec nanmean(S2(1,:).*S2(3,:))]; flab = [flab; [probe '_cross_xz_norm']];
+    fvec = [fvec nanmean(S2(1,:).*S2(3,:))]; flab = [flab; [probe '_cross_zx_norm']];
     fvec = [fvec nanmean(S2(2,:).*S2(3,:))]; flab = [flab; [probe '_cross_yz_norm']];
     fvec = [fvec abs(nanmean(S2(1,:).*S2(2,:)))]; flab = [flab; [probe '_cross_xy_norm_abs']];
-    fvec = [fvec abs(nanmean(S2(1,:).*S2(3,:)))]; flab = [flab; [probe  '_cross_xz_norm_abs']];
+    fvec = [fvec abs(nanmean(S2(1,:).*S2(3,:)))]; flab = [flab; [probe  '_cross_zx_norm_abs']];
     fvec = [fvec abs(nanmean(S2(2,:).*S2(3,:)))]; flab = [flab; [probe '_cross_yz_norm_abs']];
     
     % cross products
     fvec = [fvec nanmean(S(1,:).*S(2,:))]; flab = [flab; [probe '_cross_xy']];
-    fvec = [fvec nanmean(S(1,:).*S(3,:))]; flab = [flab; [probe '_cross_xz']];
+    fvec = [fvec nanmean(S(1,:).*S(3,:))]; flab = [flab; [probe '_cross_zx']];
     fvec = [fvec nanmean(S(2,:).*S(3,:))]; flab = [flab; [probe '_cross_yz']];
     fvec = [fvec abs(nanmean(S(1,:).*S(2,:)))]; flab = [flab; [probe '_cross_xy_abs']];
-    fvec = [fvec abs(nanmean(S(1,:).*S(3,:)))]; flab = [flab; [probe '_cross_xz_abs']];
+    fvec = [fvec abs(nanmean(S(1,:).*S(3,:)))]; flab = [flab; [probe '_cross_zx_abs']];
     fvec = [fvec abs(nanmean(S(2,:).*S(3,:)))]; flab = [flab; [probe '_cross_yz_abs']];
 
 end

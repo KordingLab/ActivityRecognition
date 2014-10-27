@@ -11,6 +11,8 @@ ntrees = 50;   %number of trees for Random Forest
 
 addpath([pwd '/sub']); %Add path to helper scripts
 
+send_to_server = true;
+
 %% INIT
 %Load Train data
 load('train_data');
@@ -215,5 +217,10 @@ fprintf('   Avg Class Accuracy = %.2f\n', mean(acc));
 fprintf('   Precision = %.2f\n', mean(prec));
 fprintf('   Recall = %.2f\n', mean(rec));
 fprintf('   F1 score = %.2f\n', 2*mean(prec)*mean(rec)/(mean(prec)+mean(rec)));
+
+if send_to_server,
+    result = SendToServer(RFmodel, TrainData, acc);
+    disp(result);
+end
 
 toc;
