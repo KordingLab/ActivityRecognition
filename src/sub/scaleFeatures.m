@@ -1,4 +1,4 @@
-% Changed from scaling to [0 1] to normalization
+% Changed from scaling to [0 1] to proper normalization
 
 function [data] = scaleFeatures(data)
 

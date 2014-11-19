@@ -25,6 +25,7 @@ clipThresh = 0.8; %to be in training set, clips must have >X% of label
 
 % create local variables for often used data
 features     = TrainData.features;
+featureLabels = TrainData.featureLabels;
 statesTrue = TrainData.activity;
 uniqStates  = unique(statesTrue);
 
@@ -37,7 +38,7 @@ for i = 1:length(uniqStates),
 end
 
 %Normalization
-features = scaleFeatures(features);
+% features = scaleFeatures(features);
 
 %get codes for the true states
 codesTrue = zeros(1,length(statesTrue));
@@ -51,17 +52,16 @@ StateCodes(:,1) = uniqStates;
 StateCodes(:,2) = num2cell(1:length(uniqStates)); %sorted by unique
 
 %% TRAIN RF with standard parameters
-disp(['RF Train with ' num2str(ntrees) ' trees...']);
-RFmodel = TreeBagger(ntrees, features, codesTrue', 'OOBVarImp', 'off');
+disp(['Training RF model with ' num2str(ntrees) ' trees ...']);
+RFmodel = TreeBagger(ntrees, features, codesTrue', 'PredictorNames', upper(featureLabels), 'OOBVarImp', 'off');
 % RFmodel = fitensemble(features, codesTrue', 'AdaBoostM1', ntrees, 'Tree');
 [codesRF, P_RF] = predict(RFmodel,features);  %Only probabilities are needed to train the HMM
 codesRF = str2num(cell2mat(codesRF));
 
 %% TRAIN HMM (i.e. create HMM and set the emission prob as the RF posteriors)
-disp('HMM Train...');
+disp('Training HMM ...');
 
 %load the transition matrix
-% transitionFile = 'A_6Activity.xls';
 transitionFile = 'A_8Activity.xls';
 fprintf('HMM: Setting transition matrix according to %s\n', transitionFile);
 A = xlsread(transitionFile);
@@ -80,7 +80,7 @@ features = TestData.features; %features for classifier
 activity = TestData.activity;
 
 %statistical normalization
-features = scaleFeatures(features);
+% features = scaleFeatures(features);
 
 % Run RF on test data
 disp('Predict activites with RF');
@@ -219,8 +219,8 @@ fprintf('   Recall = %.2f\n', mean(rec));
 fprintf('   F1 score = %.2f\n', 2*mean(prec)*mean(rec)/(mean(prec)+mean(rec)));
 
 if send_to_server,
-    result = SendToServer(RFmodel, TrainData, acc);
-    disp(result);
+    result = SendToServer(RFmodel, TrainData, sum(codesHmm==codesTrue)/length(codesTrue));
+    disp('JSON object created.');
 end
 
 toc;

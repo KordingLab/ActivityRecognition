@@ -2,24 +2,34 @@ function [fvec flab feature_set] = getFeatures(data, probe, secs, rate)
 
 feature_set = 'F2';
 
+do_interpolation = false;
+
 % Removing samples with identical timestamps
 % Ideally this should be done when preparing data (which is the case for
 % Purple Robot data), but for some external datasets such as CU's it is
 % necessary.
-ind_remove = find(diff(data(1,:))==0);
-data(:,ind_remove) = [];
+% ind_remove = find(diff(data(1,:))==0);
+% data(:,ind_remove) = [];
+
+
 % if ~isempty(ind_remove),
 %     fprintf('getFeatures: Warning: %d samples with identical timestamps found and removed.\n', length(ind_remove));
 % end
 
+% no interpolation for now
+
 % INTERPOLATION 
 % to make a consistent number of datapoints and get rid of occasional sensor noise
-arr_size = round(secs*rate);
-start_sec = data(1,1);
-data_int = zeros([size(data,1), arr_size]);
-data_int(1,:) = start_sec + ([0:arr_size-1]' / arr_size * secs);
-for dim = 2:size(data,1),
-    data_int(dim,:) = interp1(data(1,:), data(dim,:), data_int(1,:), 'linear', 'extrap');
+if do_interpolation,
+    arr_size = round(secs*rate);
+    start_sec = data(1,1);
+    data_int = zeros([size(data,1), arr_size]);
+    data_int(1,:) = start_sec + ([0:arr_size-1]' / arr_size * secs);
+    for dim = 2:size(data,1),
+        data_int(dim,:) = interp1(data(1,:), data(dim,:), data_int(1,:), 'linear', 'extrap');
+    end
+else
+    data_int = data;
 end
 
 % local variables for feature extraction
@@ -89,7 +99,8 @@ else
         
         
         % moments of the difference
-        fvec = [fvec sqrt(nanmean(diff(S(i,:)).^2))]; flab = [flab; [probe axes{i} '_diff_mean']];
+        %fvec = [fvec sqrt(nanmean(diff(S(i,:)).^2))]; flab = [flab; [probe axes{i} '_diff_mean']];
+        fvec = [fvec nanmean(diff(S(i,:)))]; flab = [flab; [probe axes{i} '_diff_mean']];  %changed
         fvec = [fvec nanstd(diff(S(i,:)))]; flab = [flab; [probe axes{i} '_diff_std']];
         fvec = [fvec skewness(diff(S(i,:)))]; flab = [flab; [probe axes{i} '_diff_skew']];
         fvec = [fvec kurtosis(diff(S(i,:)))]; flab = [flab; [probe axes{i} '_diff_kurt']];
@@ -104,6 +115,7 @@ else
     % for quasi-angles
     % NOTE: if this is meant to calculate the angles (cosine of angles)
     % then it is doing it in a completely wrong way
+    
     % S2=S/sqrt(nansum(S.^2));
     
     % corrected:

@@ -14,8 +14,6 @@ cleanup; % deletes temporary clip and feature files from previous simulations
 % test: only use directories ending with '_t' for feature extraction
 % run_mode = 'train';
 
-do_reflection = true;
-
 % probes = {'acc','gyr','lac','rot','mag'};    % probes to be used
 probes = {'acc','gyr'};
 
@@ -167,8 +165,7 @@ for file_subj = 1:size(files,2),
     filename = files{1,file_subj}; % NOTE: all probe features (acc, gyr, etc.) at the moment are saved under the name acc_*!
     filename = filename(find(files{1}=='_',1,'first')+1:end);
     
-    %fprintf('\nCalculating features %d/%d (Interpolation at %dHz)... ', file_subj, size(files,2), options.rate);
-    fprintf('\nCalculating features %d/%d (no interpolation)... ', file_subj, size(files,2));
+    fprintf('\nCalculating features %d/%d (Interpolation at %dHz)... ', file_subj, size(files,2), options.rate);
     
     %i do not use reflections on the signal, but the option is still there
     if do_reflection,

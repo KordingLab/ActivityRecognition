@@ -3,10 +3,11 @@
 clear all;
 close all;
 
-feature_set = 'F3.1';
+feature_set = 'F2';
 probes = {'acc', 'gyr'};
-subject = 'SS_c';
-feature_dir = '~/Dropbox/Data/ActivityRecognition/features_archive/';
+subject = 'FTC_TW1';
+% feature_dir = '~/Dropbox/Data/ActivityRecognition/features_archive/';
+feature_dir = '~/Dropbox/Data/temp/features/';
 
 % sorting probe names alphabetically
 G = cell(size(probes));
@@ -32,7 +33,8 @@ for f = 1:length(files),
     subplot(4,1,[1 2]);
     features = features_data.features;
     num_samp = size(features,1);
-    features_normalized = scaleFeatures_v2(features);
+%     features_normalized = scaleFeatures(features);
+    features_normalized = features; %%%%%%%%%%%%%% no normalization
     imagesc(features_normalized');
     colormap gray;
     set(gca, 'ytick', 1:N, 'yticklabel', features_data.feature_labels);
