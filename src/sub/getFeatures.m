@@ -1,6 +1,6 @@
 function [fvec flab feature_set] = getFeatures(data, probe, secs, rate)
 
-feature_set = 'F2';
+feature_set = 'F1';
 
 do_interpolation = false;
 
@@ -72,11 +72,11 @@ else
         fvec = [fvec abs(nanmin(S(i,:)))];  flab = [flab; [probe axes{i} '_min_abs']];
         
         %TODO
-        % add histogram of raw values
+        % adding histogram of raw values
         
         % histogram of the z-score values
         histvec = histc((S(i,:)-nanmean(S(i,:))/nanstd(S(i,:))),[-3:1:3]);
-        histvec = histvec(1:end-1); % remove the last data point which counts how many values match exactly 3. (nonsense)
+        histvec = histvec(1:end-1); % removing the last data point which counts how many values match exactly 3. (nonsense)
         fvec = [fvec histvec]; 
         for j=1:length(histvec),
             flab = [flab; [probe axes{i} sprintf('_hist%d',j)]];
@@ -88,15 +88,13 @@ else
         fvec = [fvec kurtosis(S(i,:))]; flab = [flab; [probe axes{i} '_kurt']];
         
         % fourier transform
-%         Y = abs(fft(S(i,:)));
-%         Y = Y/sqrt(sum(Y.^2));
-%         Y = Y(1:end/2);
-%         Y = Y(1:10); % only the first 10 coefficients
-%         fvec = [fvec Y];
-%         for j=1:length(Y),
-%             flab = [flab; [probe axes{i} sprintf('_fft%d',j)]];
-%         end
-        
+        Y = abs(fft(S(i,:), 256));
+        Y = Y(2:20); % only the first 20 coefficients (not the very first one which is the energy)
+        Y = Y/sum(Y);
+        fvec = [fvec Y];
+        for j=1:length(Y),
+            flab = [flab; [probe axes{i} sprintf('_fft%d',j)]];
+        end
         
         % moments of the difference
         %fvec = [fvec sqrt(nanmean(diff(S(i,:)).^2))]; flab = [flab; [probe axes{i} '_diff_mean']];

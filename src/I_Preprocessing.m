@@ -3,33 +3,30 @@
 % The new version of getTestClips() extracts clips from multiple probes at the same time
 % overlap option is also now available for getTestClips()
 
-clc; 
-clear all; 
+clear; 
 close all;
 
-cleanup; % deletes temporary clip and feature files from previous simulations
-
-% Run Mode:
-% train: only use directories ending with '_c' for feature extraction
-% test: only use directories ending with '_t' for feature extraction
-% run_mode = 'train';
-
-do_reflection = true;
+subjects = {'baseline0','baseline1','baseline2','SK0','SK1','PL'};
 
 % probes = {'acc','gyr','lac','rot','mag'};    % probes to be used
 probes = {'acc','gyr'};
 
+cleanup; % deletes temporary clip and feature files from previous simulations
+
+do_reflection = true;
+
 currentDir = pwd;
-addpath([pwd '/sub']); %create path to helper scripts
+addpath([pwd '/sub']); %create path to additional scripts
 
-% raw data directory
-dataDir = ['~/Dropbox/Data/FTC/'];
-% dataDir = ['/home/sohrob/Dropbox/Data/Cornell_adapted/raw/'];
+% input dir
+dataDir = ['~/Dropbox/Data/FTC/raw/'];
 
+% output dir
+trainingFeatureDir = ['~/Dropbox/Data/FTC/features/train/'];
+
+% temporary dirs
 tempDir = ['~/Dropbox/Data/temp/'];
-trainingFeatureDir = [tempDir 'features/'];
 clipDir = [tempDir 'clips/'];
-dirList = dir(dataDir);
 
 % sorting probe names alphabetically
 G = cell(size(probes));
@@ -44,44 +41,8 @@ options.overlap = 0.75;
 options.rate = 50;  % sampling frequency to interpolate to in getFeatures
 options.activity_columns = 2;   % activity+location
 options.activity_fraction = 0;
-options.forceFileRewrite = 1;
+options.forceFileRewrite = 0;
 
-% patientDir = {};
-% controlDir = {};
-% testDir = {};
-
-rawDirs = {};
-
-for directory = 1:length(dirList)
-    dirName = dirList(directory).name;
-    %skip current directory
-    if dirName(1) == '.'
-        continue;
-    else
-        rawDirs{end+1} = dirName;
-    end
-%     elseif strcmp(dirName(end),'p') %patient data
-%         patientDir{end+1} = dirName;
-%     elseif strcmp(dirName(end),'c') %control data
-%         controlDir{end+1} = dirName;
-%     elseif strcmp(dirName(end),'t') %test data
-%         testDir{end+1} = dirName;
-%     end
-end
-
-%Select which directories to use for feature extraction:
-% if strcmp(run_mode, 'train'),
-%     rawDirs = {controlDir{:}};
-% elseif strcmp(run_mode, 'test'),
-%     rawDirs = {testDir{:}};
-% end
-
-if isempty(rawDirs),
-%     error(['No appropriate data directory found for ', run_mode, ' run mode.']);
-    error(['No data directory found.']);
-end
-
-filePathName = 'filepath';
 
 %% Get the clips
 
@@ -89,12 +50,12 @@ filePathName = 'filepath';
 
 uniqueStates = {};
 
-for subject = 1:length(rawDirs)
+for subject = 1:length(subjects),
     
-    fprintf('Extracting clips %d/%d (%d sec, %d%% overlap)...\n', subject, length(rawDirs), options.secs, options.overlap*100);
+    fprintf('Extracting clips %d/%d (%d sec, %d%% overlap)...\n', subject, length(subjects), options.secs, options.overlap*100);
 
     %set up data directories we are going to use
-    subjectDir = rawDirs{subject};
+    subjectDir = subjects{subject};
     dataFilePrefix = [dataDir subjectDir];
     for prb = 1:length(probes),
         clipFile{prb} = [clipDir cell2mat(probes(prb)) '_' subjectDir '.mat'];
@@ -230,11 +191,11 @@ for file_subj = 1:size(files,2),
     end
     
     filename = [feature_set '_' cell2mat(probes) '_' filename];
-    disp(['Writing to file ' filename]);
     writefile = [trainingFeatureDir filename];
     if exist(writefile,'file') && ~options.forceFileRewrite
-        disp(['File ' filename ' exists. Skipping...']);
+        fprintf(2, ['File ' filename ' exists. Skipping!\n']);
     else
+        disp(['Writing to file ' filename]);
         save(writefile, 'features_data');
     end
     
@@ -243,4 +204,4 @@ for file_subj = 1:size(files,2),
 end
 
   
-disp('Now go to /temp/features and sort the training and test features.');
+% disp('Now go to /FTC/features and sort the training and test features.');

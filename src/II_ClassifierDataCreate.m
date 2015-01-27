@@ -2,12 +2,12 @@
 % This program combines all feature files inside the 'train' directory into
 % 'train_data.mat'; and files in the 'test' directory into 'test_data.mat'.
 
-clear all;
+clear;
 close all;
 
 addpath([pwd '/sub']); %create path to helper scripts
 
-FeatureDir = ['~/Dropbox/Data/temp/features/'];
+FeatureDir = ['~/Dropbox/Data/FTC/features/'];
 
 % training and test data dirs
 TrainDir = [FeatureDir 'train/'];

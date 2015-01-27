@@ -5,31 +5,30 @@
 
 clc; clear all; close all;
 
-tic;
-
-ntrees = 50;   %number of trees for Random Forest
+ntrees = 100;   %number of trees for Random Forest
 
 addpath([pwd '/sub']); %Add path to helper scripts
 
-send_to_server = true;
+write_to_phone = true;
 
-%% INIT
-%Load Train data
+%% LOADING DATA
+
+% loading Train data
 load('train_data');
 
-%Clip threshold options
+% clip threshold options
 clipThresh = 0.8; %to be in training set, clips must have >X% of label
 
-% remove any clips that don't meet the training set threshold
+% removing any clips that don't meet the training set threshold
 [TrainData, removeInd] = removeDataWithActivityFraction(TrainData,clipThresh);
 
-% create local variables for often used data
-features     = TrainData.features;
+% creating local variables for often used data
+features = TrainData.features;
 featureLabels = TrainData.featureLabels;
 statesTrue = TrainData.activity;
 uniqStates  = unique(statesTrue);
 
-% How many clips of each activity class have we removed?
+% how many clips of each activity class have we removed?
 for i = 1:length(uniqStates),
     indr = find(strcmp(statesTrue(removeInd), uniqStates(i)));
     indtot = find(strcmp(statesTrue, uniqStates(i)));
@@ -37,63 +36,59 @@ for i = 1:length(uniqStates),
     disp([num2str(removed) ' % of ' uniqStates{i} ' data removed'])
 end
 
-%Normalization
-% features = scaleFeatures(features);
-
-%get codes for the true states
+% getting codes for the true states
 codesTrue = zeros(1,length(statesTrue));
 for i = 1:length(statesTrue)
     codesTrue(i) = find(strcmp(statesTrue{i}, uniqStates));
 end
 
-%Store code and label of each unique State
+% storing code and label of each unique State
 StateCodes = cell(length(uniqStates),2);
 StateCodes(:,1) = uniqStates;
 StateCodes(:,2) = num2cell(1:length(uniqStates)); %sorted by unique
 
-%% TRAIN RF with standard parameters
-disp(['Training RF model with ' num2str(ntrees) ' trees ...']);
+%% TRAINING 
+
+% RF
+disp(['Training RF with ' num2str(ntrees) ' trees ...']);
 RFmodel = TreeBagger(ntrees, features, codesTrue', 'PredictorNames', upper(featureLabels), 'OOBVarImp', 'off');
 % RFmodel = fitensemble(features, codesTrue', 'AdaBoostM1', ntrees, 'Tree');
 [codesRF, P_RF] = predict(RFmodel,features);  %Only probabilities are needed to train the HMM
 codesRF = str2num(cell2mat(codesRF));
 
-%% TRAIN HMM (i.e. create HMM and set the emission prob as the RF posteriors)
-disp('Training HMM ...');
-
-%load the transition matrix
-transitionFile = 'A_8Activity.xls';
-fprintf('HMM: Setting transition matrix according to %s\n', transitionFile);
-A = xlsread(transitionFile);
-
+% TRAINING HMM (i.e. create HMM and set the emission prob as the RF posteriors)
+% disp('Training HMM ...');
 % training HMM on train data
 % [TR, EM] = hmmestimate(codesRF, codesTrue);
 
-%% TEST ON THE UNLABELED DATASET
+
+
+%% CROSS-VALIDATING ON THE TEST DATASET
+
 clear trainingClassifierData cData features;
 
-%load Test dataset(features) for classifier 
+% loading the test dataset
 load('test_data');
 
-%create local variables for often used data
+% creating local variables for often used data
 features = TestData.features; %features for classifier
 activity = TestData.activity;
 
-%statistical normalization
-% features = scaleFeatures(features);
-
-% Run RF on test data
-disp('Predict activites with RF');
+% RF
+disp('Predicting activites using RF');
 [codesRF,P_RF] = predict(RFmodel,features);
 codesRF = str2num(cell2mat(codesRF));
 statesRF = uniqStates(codesRF); %predicted states by the RF
 
-%% predict the states using the HMM
-disp('Predict activites with HMM');
+% HMM
+disp('Predicting activites using HMM');
 
 % discarding the trained transition and emission matrices, and using
 % hand-crafted ones (basically, using the HMM as an LPF)
-TR = A;
+% loading the transition matrix
+transitionFile = 'A_8Activity.xls';
+fprintf('HMM: Setting transition matrix according to %s\n', transitionFile);
+TR = xlsread(transitionFile);
 EM = (eye(8,8)*(.5-.5/7)) + .5/7;
 codesHmm = hmmviterbi(codesRF, TR, EM);
 
@@ -103,15 +98,16 @@ time_Res = 1;      %TO BE INCLUDED IN ClassifierData structure
 t = 0:time_Res:time_Res*(length(codesHmm)-1);
 
 h=figure; hold on;
-set(h,'position',[2416         583         791         620]);
+set(h,'position',[2416           1         791         963]);
 
-subplot 311; hold on;
-imagesc(t, 1:size(features,2), features');
+subplot(6,1,1:4); hold on;
+imagesc(t, 1:size(features,2), (zscore(features))');
 colormap gray;
-set(gca, 'ytick', 1:size(features,2), 'yticklabel', TestData.featureLabels);
+set(gca, 'ytick', 1:size(features,2), 'yticklabel', TestData.featureLabels, 'TickLabelInterpreter', 'none');
+% set(0, 'DefaultTextInterpreter', 'none');
 axis tight;
 
-subplot 312; hold on;
+subplot 615; hold on;
 codesTrue = zeros(1,length(activity));
 for i = 1:length(activity)
     codesTrue(i) = find(strcmp(activity{i},uniqStates));
@@ -126,7 +122,7 @@ legend('True','RF','HMM');
 axis tight;
 grid on;
 
-subplot 313; hold on;
+subplot 616; hold on;
 % plot(t/60,max(gamma));   %plot Max posterior for the class (HMM)
 post = max(P_RF,[],2);
 plot(t/60, post, 'r');   %plot Max posterior for the class (RF)
@@ -135,7 +131,7 @@ plot(t/60, smooth(post, 100));
 axis tight;
 ylabel('confidence');
 
-%Display % of each activity over all predictions  
+% Displaying the activity histogram
 Activity_Percentage = StateCodes;
 for i = 1:size(StateCodes,1)
     ind = strcmp(uniqStates(codesHmm), Activity_Percentage{i,1});
@@ -146,7 +142,7 @@ set(h,'position',[3216         671         560         420]);
 bar(cell2mat(Activity_Percentage(:,2)));
 set(gca,'XTickLabel',Activity_Percentage(:,1))
 
-%Display the confusion matrix
+% Displaying the confusion matrix
 h = figure;
 set(h,'position',[3217         163         560         420]);
 mat = confusionmat(codesTrue, codesHmm);
@@ -167,7 +163,7 @@ xlabel('Predicted'); ylabel('True');
 set(gca, 'xtick', 1:length(unique(codesTrue)), 'xticklabel', uniqStates(unique(codesTrue)));
 set(gca, 'ytick', 1:length(unique(codesTrue)), 'yticklabel', uniqStates(unique(codesTrue)));
 
-%printing RF accuracy, precision and recall for each class
+% displaying RF accuracy, precision and recall for each class
 fprintf('\n**************** RF accuracy:\n');
 k = 0;
 activities = StateCodes(unique(codesTrue),1);
@@ -193,7 +189,7 @@ fprintf('   Precision = %.2f\n', mean(prec));
 fprintf('   Recall = %.2f\n', mean(rec));
 fprintf('   F1 score = %.2f\n', 2*mean(prec)*mean(rec)/(mean(prec)+mean(rec)));
 
-%printing HMM accuracy, precision and recall for each class
+% displaying HMM accuracy, precision and recall for each class
 fprintf('\n**************** HMM accuracy:\n');
 k = 0;
 for i=unique(codesTrue),
@@ -218,9 +214,8 @@ fprintf('   Precision = %.2f\n', mean(prec));
 fprintf('   Recall = %.2f\n', mean(rec));
 fprintf('   F1 score = %.2f\n', 2*mean(prec)*mean(rec)/(mean(prec)+mean(rec)));
 
-if send_to_server,
-    result = SendToServer(RFmodel, TrainData, sum(codesHmm==codesTrue)/length(codesTrue));
+%% write to phone
+if write_to_phone,
+    result = CreateJSON(RFmodel, TrainData, sum(codesHmm==codesTrue)/length(codesTrue));
     disp('JSON object created.');
 end
-
-toc;

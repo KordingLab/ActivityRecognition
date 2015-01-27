@@ -7,7 +7,7 @@ feature_set = 'F2';
 probes = {'acc', 'gyr'};
 subject = 'FTC_TW2';
 % feature_dir = '~/Dropbox/Data/ActivityRecognition/features_archive/';
-feature_dir = '~/Dropbox/Data/temp/features/';
+feature_dir = '~/Dropbox/Data/temp/features/train/';
 
 % sorting probe names alphabetically to mactch the way they have been
 % produced by I_Preprocessing.m
@@ -33,7 +33,8 @@ imagesc(features'); colormap gray;
 set(gca, 'ytick', 1:N, 'yticklabel', features_data.feature_labels', 'TickLabelInterpreter', 'none');
 
 ax(2) = subplot(1,2,2);
-features_app = load('features.csv');
+% features_app = load('features.csv');
+features_app = load('mtp://[usb:003,006]/Internal%20storage/Android/data/edu.northwestern.sohrob.activityrecognition.activityrecognition/files');
 imagesc(features_app'); colormap gray;
 set(gca, 'ytick', 1:N, 'yticklabel', features_data.feature_labels', 'TickLabelInterpreter', 'none');
 

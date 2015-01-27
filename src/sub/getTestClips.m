@@ -54,7 +54,8 @@ end
 
 % generate a list of data files for all probes and trials
 for prb = 1:length(options.probes),
-    datafiles{prb} = expandFilenames(accdata, ['/', options.probes{prb}, '_*.csv']);
+    %datafiles{prb} = expandFilenames(accdata, ['/', options.probes{prb}, '_*.csv']);
+    datafiles{prb} = expandFilenames(accdata, ['/', options.probes{prb}, '.csv']);
     if isempty(datafiles{prb})
         error(['No data files found for probe ', options.probes{prb}]);
     end
