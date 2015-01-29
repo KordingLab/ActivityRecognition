@@ -12,7 +12,7 @@ ntrees = 100;   %number of trees for Random Forest
 
 write_to_phone = true;
 
-uniqStates = {'Walk', 'Stationary'};    %1: walk; 2: stationary
+
 
 %% LOADING DATA
 
@@ -31,7 +31,7 @@ clipThresh = 0.8; %to be in training set, clips must have >X% of label
 features = TrainData.features;
 featureLabels = TrainData.featureLabels;
 statesTrue = TrainData.activity;
-% uniqStates  = unique(statesTrue);
+uniqStates  = unique(statesTrue);
 
 % how many clips of each activity class have we removed?
 for i = 1:length(uniqStates),
@@ -58,7 +58,7 @@ StateCodes(:,2) = num2cell(1:length(uniqStates)); %sorted by unique
 disp(['Training RF with ' num2str(ntrees) ' trees ...']);
 RFmodel = TreeBagger(ntrees, features, codesTrue', 'PredictorNames', upper(featureLabels), 'OOBVarImp', 'off');
 % RFmodel = fitensemble(features, codesTrue', 'AdaBoostM1', ntrees, 'Tree');
-[codesRF, ~] = predict(RFmodel,features);  %Only probabilities are needed to train the HMM
+[codesRF, P_RF] = predict(RFmodel,features);  %Only probabilities are needed to train the HMM
 codesRF = str2num(cell2mat(codesRF));
 
 % TRAINING HMM (i.e. create HMM and set the emission prob as the RF posteriors)
@@ -230,4 +230,4 @@ if exist(filename),
     disp('Warning: overwriting the exisiting file...');
 end
 save(filename, 'RFmodel');
-disp(sprintf('Results successfully written to %s', filename));
+disp('Results successfully written to export/');

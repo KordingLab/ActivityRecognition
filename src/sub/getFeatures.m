@@ -90,7 +90,7 @@ else
         % fourier transform
         Y = abs(fft(S(i,:), 256));
         Y = Y(2:20); % only the first 20 coefficients (not the very first one which is the energy)
-        Y = Y/sum(Y);
+%         Y = Y/sum(Y);
         fvec = [fvec Y];
         for j=1:length(Y),
             flab = [flab; [probe axes{i} sprintf('_fft%d',j)]];

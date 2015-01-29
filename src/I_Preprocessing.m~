@@ -53,8 +53,7 @@ uniqueStates = {};
 
 % for subject = 1:length(subjects),
 
-% fprintf('Extracting clips %d/%d (%d sec, %d%% overlap)...\n', subject, length(subjects), options.secs, options.overlap*100);
-fprintf('Extracting clips (%d sec, %d%% overlap)...\n', options.secs, options.overlap*100);
+fprintf('Extracting clips %d/%d (%d sec, %d%% overlap)...\n', subject, length(subject), options.secs, options.overlap*100);
 
 %set up data directories we are going to use
 % subjectDir = subjects{subject};
