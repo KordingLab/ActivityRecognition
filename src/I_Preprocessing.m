@@ -6,10 +6,10 @@
 clear; 
 close all;
 
-% subjects = {'SSW1'};
+% subjects = {'',''};
 global subject;
 
-% probes = {'acc','gyr','lac','rot','mag'};    % probes to be used
+% probes to be used
 probes = {'acc','gyr'};
 
 cleanup; % deletes temporary clip and feature files from previous simulations
@@ -20,13 +20,14 @@ currentDir = pwd;
 addpath([pwd '/sub']); %create path to additional scripts
 
 % input dir
-dataDir = ['~/Dropbox/Data/FTC/raw/'];
+dataDir = '~/Dropbox/Data/FTC/raw/';
 
 % output dir
-trainingFeatureDir = ['~/Dropbox/Data/FTC/features/train/'];
+trainingFeatureDir = '~/Dropbox/Data/FTC/features/train/';
+testingFeatureDir = '~/Dropbox/Data/FTC/features/test/';
 
 % temporary dirs
-tempDir = ['~/Dropbox/Data/temp/'];
+tempDir = '~/Dropbox/Data/temp/';
 clipDir = [tempDir 'clips/'];
 
 % sorting probe names alphabetically
@@ -191,8 +192,15 @@ for file_subj = 1:size(files,2),
     if exist(writefile,'file') && ~options.forceFileRewrite
         fprintf(2, ['File ' filename ' exists. Skipping!\n']);
     else
-        disp(['Writing to file ' filename]);
+        disp(['Writing to file ' writefile]);
         save(writefile, 'features_data');
+    end
+    writefile_test = [testingFeatureDir filename];
+    if exist(writefile_test,'file') && ~options.forceFileRewrite
+        fprintf(2, ['File ' filename ' exists. Skipping!\n']);
+    else
+        disp(['Writing to file ' writefile_test]);
+        save(writefile_test, 'features_data');
     end
     
     clear features_data;

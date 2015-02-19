@@ -8,9 +8,11 @@ close all;
 
 global subject;
 
-ntrees = 100;   %number of trees for Random Forest
+ntrees = 200;   %number of trees for Random Forest
 
 write_to_phone = true;
+
+write_to_export = true;
 
 uniqStates = {'Walk', 'Stationary'};    %1: walk; 2: stationary
 
@@ -58,8 +60,8 @@ StateCodes(:,2) = num2cell(1:length(uniqStates)); %sorted by unique
 disp(['Training RF with ' num2str(ntrees) ' trees ...']);
 RFmodel = TreeBagger(ntrees, features, codesTrue', 'PredictorNames', upper(featureLabels), 'OOBVarImp', 'off');
 % RFmodel = fitensemble(features, codesTrue', 'AdaBoostM1', ntrees, 'Tree');
-[codesRF, ~] = predict(RFmodel,features);  %Only probabilities are needed to train the HMM
-codesRF = str2num(cell2mat(codesRF));
+% [codesRF, ~] = predict(RFmodel,features);  %Only probabilities are needed to train the HMM
+% codesRF = str2num(cell2mat(codesRF));
 
 % TRAINING HMM (i.e. create HMM and set the emission prob as the RF posteriors)
 % disp('Training HMM ...');
@@ -78,11 +80,21 @@ load('test_data');
 % creating local variables for often used data
 features = TestData.features; %features for classifier
 activity = TestData.activity;
+ind_subjectchange = [1;find(strcmp(TestData.subject(1:end-1),TestData.subject(2:end))==0)+1];
 
 % RF
 disp('Predicting activites using RF');
 [codesRF,P_RF] = predict(RFmodel,features);
-codesRF = str2num(cell2mat(codesRF));
+codesRF = str2double(codesRF);
+
+%%%%%%%%%%%%%%% predicting output for the adaboost model
+% out = zeros(ntrees, size(features,1));
+% for i=1:length(RFmodel.Trained)
+%     out(i,:) = RFmodel.Trained{i}.predict(features)'*RFmodel.TrainedWeights(i);
+% end
+% out2 = sum(out)/sum(RFmodel.TrainedWeights);
+% codesRF2 = round(out2);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % HMM
 disp('Predicting activites using HMM');
@@ -110,6 +122,11 @@ colormap gray;
 set(gca, 'ytick', 1:size(features,2), 'yticklabel', TestData.featureLabels, 'TickLabelInterpreter', 'none');
 % set(0, 'DefaultTextInterpreter', 'none');
 axis tight;
+hold on;
+for i = 1:length(ind_subjectchange),
+    plot([ind_subjectchange(i) ind_subjectchange(i)], [1 size(features,2)], '--g');
+    text(ind_subjectchange(i), size(features,2)+5, TestData.subject(ind_subjectchange(i)), 'rotation', 90);
+end
 
 subplot 615; hold on;
 codesTrue = zeros(1,length(activity));
@@ -171,6 +188,9 @@ set(gca, 'ytick', 1:length(unique(codesTrue)), 'yticklabel', uniqStates(unique(c
 fprintf('\n**************** RF accuracy:\n');
 k = 0;
 activities = StateCodes(unique(codesTrue),1);
+prec = zeros(length(unique(codesTrue)),1);
+rec = zeros(length(unique(codesTrue)),1);
+acc = zeros(length(unique(codesTrue)),1);
 for i=unique(codesTrue),
     k = k+1;
     tp = sum(codesTrue(codesRF==i)==i);
@@ -225,9 +245,11 @@ if write_to_phone,
 end
 
 %% write to local drive
-filename = sprintf('export/%s.mat',subject);
-if exist(filename),
-    disp('Warning: overwriting the exisiting file...');
+if write_to_export,
+    filename = sprintf('export/%s.mat',subject);
+    if exist(filename, 'file'),
+        disp('Warning: overwriting the exisiting file in export/...');
+    end
+    save(filename, 'RFmodel');
+    fprintf('Results successfully written to %s\n', filename);
 end
-save(filename, 'RFmodel');
-disp(sprintf('Results successfully written to %s', filename));

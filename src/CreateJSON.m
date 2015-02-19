@@ -24,17 +24,6 @@ for i = 1:length(forest.Trees),
 end
 json = [json, '],\n'];
 
-% creating the feature name dictionary -- not necessary anymore
-% json = [json, ',\n\t"map":{\n'];
-% for i=1:length(traindata.featureLabels),
-%     json = [json, sprintf('\t\t"%s":"x%d"', upper(traindata.featureLabels{i}), i)];
-%     if i<length(traindata.featureLabels),
-%         json = [json, ','];
-%     end
-%     json = [json, '\n'];
-% end
-% json = [json, '\t}'];
-
 % adding feature lables
 json = [json, '\t"feature_labels": [\n'];
 for i=1:length(traindata.featureLabels),

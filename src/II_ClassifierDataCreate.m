@@ -7,7 +7,7 @@ close all;
 
 addpath([pwd '/sub']); %create path to helper scripts
 
-FeatureDir = ['~/Dropbox/Data/FTC/features/'];
+FeatureDir = '~/Dropbox/Data/FTC/features/';
 
 % training and test data dirs
 TrainDir = [FeatureDir 'train/'];
