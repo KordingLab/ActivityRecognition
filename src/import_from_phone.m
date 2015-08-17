@@ -4,7 +4,7 @@ close all;
 %% subject name
 % format: XX[W/S]k (XX: subject's initials; W/S: trial type (Walk/Sit); k: trial number)
 global subject;
-subject = 'SSS0';
+subject = 'MDW2';
 
 %% activity class
 % 1: walk, 2:stationary

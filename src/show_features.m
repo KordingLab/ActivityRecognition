@@ -7,7 +7,7 @@ feature_set = 'F2';
 probes = {'acc', 'gyr'};
 subject = 'FTC_TW1';
 % feature_dir = '~/Dropbox/Data/ActivityRecognition/features_archive/';
-feature_dir = '~/Dropbox/Data/temp/features/';
+feature_dir = '~/Dropbox/Data/FTC/features/archive/';
 
 % sorting probe names alphabetically
 G = cell(size(probes));
