@@ -18,7 +18,7 @@ uniqStates = {'Walk', 'Stationary'};    %1: walk; 2: stationary
 
 %% LOADING DATA
 
-addpath([pwd '/sub']); %Add path to helper scripts
+addpath([pwd '/functions']); %Add path to helper scripts
 
 % loading training data
 load('train_data');

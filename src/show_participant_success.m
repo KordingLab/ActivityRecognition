@@ -9,7 +9,7 @@ perf_walk{end}(2) = [];
 colors = parula(length(subjects));
 
 h = figure;
-set(h, 'position', [2124         445         672         432]);
+set(h, 'position', [0         0         672         432]);
 hold on;
 
 for subj = 1:length(subjects),
@@ -28,8 +28,10 @@ end
 % xminmax = xlim;
 % plot([xminmax(1) xminmax(2)], [.5 .5], '--', 'color', [.65 .65 .65], 'linewidth', 2);
 % set(gca, 'xtick', 1:xminmax(2));
-xlabel('Trial #');
-ylabel('Average Sitting/Walking Success Rate (%)');
+xlabel('Retraining Round #', 'fontsize', 14);
+ylabel('Average Success Rate (%)', 'fontsize', 14);
 % legend(subjects);
 set(gca, 'xtick', 1:4);
 xlim([.7 4.3]);
+legend('S1','S2','S3','S4','S5','S6','S7','S8','S9','S10','S11','S12','S13','S14',...
+    'location', 'eastoutside');

@@ -1,7 +1,7 @@
 clear;
 close all;
 
-os = 'lin';
+os = 'win';
 
 n_trial = 4;
 recalculate_coefs = false;
@@ -18,13 +18,13 @@ else
     error('Unknown OS option.');
 end
 
-
 clip_start = 1;
 xmin = -1000;
 xmax = 15000;
 ymin = -2000;
 ymax = 2000;
-dot_size = 20;
+% dot_size = 20;
+marker_size = 5;
 
 % loading normal walk data (from subject)
 load([features_dir, 'F1_accgyr_LLW0.mat']);
@@ -57,10 +57,8 @@ end
 % score = [data_nwalk; data_nsit]*coefs;
 % label = [label_nwalk; label_nsit];
 
-
-
 h = figure;
-set(h, 'position', [2058          46        1295         704]);
+set(h, 'position', [0 0 1300 300]);
 
 % subplot(2, n_trial, 1);
 % scatter(score(:,1), score(:,2), dot_size, label, 'filled');
@@ -85,7 +83,7 @@ for i=1:(n_trial-1),
     
     load([features_dir, sprintf('F1_accgyr_LLW%d.mat',i)]);
     data_dwalk = features_data.features(clip_start:end,:);
-    load([models_dir, sprintf('LLS%d.mat',i-1)]);
+    load([models_dir, sprintf('LLS%d.mat', i-1)]);
     [RFout, ~] = predict(RFmodel, data_dwalk);
     %label_dwalk = strcmp(RFout, '1')*[1 0 0] + strcmp(RFout, '2')*[1 .6 .6];
     success_dwalk = sum(strcmp(RFout, '2'))/length(RFout);
@@ -96,23 +94,20 @@ for i=1:(n_trial-1),
     score_nsit = data_nsit*coefs;
     score_dwalk = data_dwalk*coefs;
     
-    subplot(2, n_trial-1, i);
+    subplot(1, n_trial-1, i);
 %     scatter(score(:,1), score(:,2), dot_size, [label_nsit; label_dwalk], 'filled');
-    plot(score_nsit(:,1), score_nsit(:,2), '.', 'color', [0 .5 0],'markersize',dot_size); hold on;
-    plot(score_dwalk(:,1), score_dwalk(:,2), '.', 'color', [.5 .5 .5],'markersize',dot_size);
+%     plot(score_nsit(1:8:end,1), score_nsit(1:8:end,2), 'o', 'markerfacecolor', [0 .5 0], 'color', [0 .5 0], 'markersize', 5); hold on;
+%     plot(score_dwalk(1:8:end,1), score_dwalk(1:8:end,2), 'o', 'color', [0 .5 0], 'markersize', 5);%,'markersize',dot_size);
     %scatter3(score(:,1), score(:,2), score(:,3), dot_size, [label_nsit; label_dwalk], 'filled');
-    xlim([-1000 15000]);
-    ylim([-2000 2000]);
-    set(gca, 'xticklabel', []);
-    set(gca, 'yticklabel', []);
-    xlabel('Factor 1');
-    ylabel('Factor 2');
+%     xlim([-1000 15000]);
+%     ylim([-2000 2000]);
+%     set(gca, 'xticklabel', []);
+%     set(gca, 'yticklabel', []);
+%     xlabel('Factor 1', 'fontsize', 14);
+%     ylabel('Factor 2', 'fontsize', 14);
     
 %     title(['Trial ', num2str(i)]);
     
-    if i==n_trial-1,
-        legend('True Activity','Fake Activity');
-    end
     
     %% deceptive sitting
     
@@ -129,20 +124,47 @@ for i=1:(n_trial-1),
     score_nwalk = data_nwalk*coefs;
     score_dsit = data_dsit*coefs;
     
-    subplot(2, n_trial-1, n_trial-1+i);
+%     subplot(2, n_trial-1, n_trial-1+i);%%%%%%%%%%%%%%%
     %scatter(score(:,1), score(:,2), dot_size, [label_nwalk; label_dsit], 'filled');
-    plot(score_nwalk(:,1), score_nwalk(:,2), '.', 'color', [0 .5 0],'markersize',dot_size); hold on;
-    plot(score_dsit(:,1), score_dsit(:,2), '.', 'color', [.5 .5 .5],'markersize',dot_size);
-    %scatter3(score(:,1), score(:,2), score(:,3), dot_size, [label_nwalk; label_dsit], 'filled');
-    xlim([0 15000]);
-    ylim([-2000 1500]);
+
+    hold on;
+%     plot(score_nsit(1:8:end,1), score_nsit(1:8:end,2), 'o', 'markerfacecolor', [0 .5 0], 'color', [0 .5 0], 'markersize', marker_size);
+    scatter(score_nsit(1:8:end,1), score_nsit(1:8:end,2), 'o', 'filled', 'markerfacecolor', [0 .5 0]);    
+%     plot(score_nwalk(1:8:end,1), score_nwalk(1:8:end,2), '^', 'markerfacecolor', [.8 .4 0], 'color', [.8 .4 0], 'markersize', marker_size);%,'markersize',dot_size); hold on;
+    scatter(score_nwalk(1:8:end,1), score_nwalk(1:8:end,2), '^', 'filled', 'markerfacecolor', [.8 .4 0]);    
+%     plot(score_dwalk(1:8:end,1), score_dwalk(1:8:end,2), 'o', 'color', [0 .5 0], 'markersize', marker_size);%,'markersize',dot_size);
+    scatter(score_dwalk(1:8:end,1), score_dwalk(1:8:end,2), 'o', 'markeredgecolor', [0 .5 0]);    
+    
+%     plot(score_dsit(1:8:end,1), score_dsit(1:8:end,2), '^', 'color', [.8 .4 0], 'markersize', marker_size);%,'markersize',dot_size);
+    scatter(score_dsit(1:8:end,1), score_dsit(1:8:end,2), '^', 'markeredgecolor', [.8 .4 0]);    
+
+%scatter3(score(:,1), score(:,2), score(:,3), dot_size, [label_nwalk; label_dsit], 'filled');
+    hold off;
+    alpha(.5);
+    
+    xlim([-1000 15000]);
+    ylim([-2000 2000]);
     set(gca, 'xticklabel', []);
     set(gca, 'yticklabel', []);
-    xlabel('Factor 1');
-    ylabel('Factor 2');
+    xlabel('Factor 1', 'fontsize', 14);
+    ylabel('Factor 2', 'fontsize', 14);
+    title(['Trial ', num2str(i)], 'fontsize', 14);
 
+    if i==n_trial-1,
+        l = legend('True Sitting','True Walking','Fake Sitting','Fake Walking',...
+            'location', 'northeastoutside');
+        set(l, 'fontsize', 12);
+    end
     
 end
+
+subplot 131;
+set(gca, 'position', [.05 .1 .2 .8]);
+subplot 132;
+set(gca, 'position', [.28 .1 .2 .8]);
+subplot 133;
+set(gca, 'position', [.51 .1 .2 .8]);
+
 
 if recalculate_coefs,
     save('coefs_lowdim.mat','coefs');

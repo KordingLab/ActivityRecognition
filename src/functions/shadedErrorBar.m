@@ -50,7 +50,7 @@ function varargout=shadedErrorBar(x,y,errBar,lineProps,transparent)
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
 % Error checking    
-error(nargchk(3,5,nargin))
+narginchk(3,5)
 
 
 %Process y using function handles if needed to make the error bar
@@ -90,16 +90,24 @@ defaultProps={'-k'};
 if nargin<4, lineProps=defaultProps; end
 if isempty(lineProps), lineProps=defaultProps; end
 % edited by sosata
-% if ~iscell(lineProps), lineProps={lineProps}; end
+if ~iscell(lineProps), lineProps={lineProps}; end
 
-if nargin<5, transparent=0; end
+%edited by sosata
+if nargin<5, 
+    col = [0 0 1]; 
+elseif transparent==1,
+    col = [1 .4 0];
+else
+    col = [0 0 0];
+end
+transparent=1;
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
 % Plot to get the parameters of the line 
-% H.mainLine=plot(x,y,lineProps{:});
-H.mainLine=plot(x,y,'color',lineProps);  % edited by sosata
+H.mainLine=plot(x,y,lineProps{:}, 'color', col);
+% H.mainLine=plot(x,y,'color',lineProps);  % edited by sosata
 
 
 % Work out the color of the shaded region and associated lines
@@ -152,8 +160,9 @@ H.edge(2)=plot(x,uE,'-','color',edgeColor);
 
 %Now replace the line (this avoids having to bugger about with z coordinates)
 delete(H.mainLine)
-% H.mainLine=plot(x,y,lineProps{:});
-H.mainLine=plot(x,y,'color',lineProps, 'linewidth',2);
+H.mainLine=plot(x,y,lineProps{:}, 'color', col);
+set(H.mainLine, 'markerfacecolor', col);
+% H.mainLine=plot(x,y,'color',lineProps, 'linewidth',2);  %edited by sosata
 
 
 if ~holdStatus, hold off, end

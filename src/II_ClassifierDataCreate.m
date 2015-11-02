@@ -5,7 +5,7 @@
 clear;
 close all;
 
-addpath([pwd '/sub']); %create path to helper scripts
+addpath([pwd '/functions']); %create path to helper scripts
 
 FeatureDir = '~/Dropbox/Data/FTC/features/';
 

@@ -17,7 +17,7 @@ cleanup; % deletes temporary clip and feature files from previous simulations
 do_reflection = true;
 
 currentDir = pwd;
-addpath([pwd '/sub']); %create path to additional scripts
+addpath([pwd '/functions']); %create path to additional scripts
 
 % input dir
 dataDir = '~/Dropbox/Data/FTC/raw/';

@@ -7,7 +7,7 @@ clc; clear all; close all;
 slashdir = '/';     %set to '/' for Linux and Mac, '\' for Windows
 
 currentDir = pwd;
-addpath([pwd slashdir 'sub']); %create path to helper scripts
+addpath([pwd slashdir 'functions']); %create path to helper scripts
 addpath(genpath([slashdir 'Traindata'])); %add path for train data
 
 %% INIT
