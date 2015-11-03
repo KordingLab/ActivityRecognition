@@ -1,76 +1,66 @@
 clear;
 close all;
 
-load('accuracy_cross_subject.mat');
+addpath('functions\');
 
-% removing subjetc #7 (problem in data)
-% k = 1;
-% for subj=[1:6,8:length(accuracy_mean)],
-%     accuracy_mean2{k} = accuracy_mean{subj};
-%     subjects2{k} = subjects{subj};
-%     k = k+1;
-% end
-% accuracy_mean = accuracy_mean2;
-% subjects = subjects2;
-% clear accuracy_mean2 subjects2;
+load('accuracy_paper.mat');
+% removing subject DM's data from cheating data which was influenced by a bug in the phone app
+accuracy_baseline(:,7,:) = [];
+accuracy_expert(:,7,:) = [];
+accuracy_baseline(14,:,:) = [];
+accuracy_expert(14,:,:) = [];
+accuracy_baseline_cheating = accuracy_baseline;
+accuracy_expert_cheating = accuracy_expert;
+
+load('accuracy_onnormal');
+accuracy_baseline_normal = accuracy_baseline;
+accuracy_expert_normal = accuracy_expert;
+
+clear accuracy_baseline accuracy_expert;
 
 h = figure;
-set(h, 'position', [2413         390         815         420]);
-
-subplot (1,3,[1 2]);
 hold on;
+set(h, 'position', [395.4000  209.8000  557.6000  516.0000]);
 
-colors = hsv(length(accuracy_mean));
+plot(median(mean(accuracy_baseline_cheating,3),2),'k-o','markerfacecolor',[0 0 0],'linewidth',1)
+plot(median(mean(accuracy_expert_cheating,3),2),'k-^','markerfacecolor',[0 0 0],'linewidth',1)
 
-for subj=1:length(accuracy_mean),
-    
-    means = cell2mat(accuracy_mean{subj});
-    errors = cell2mat(accuracy_std{subj})/sqrt(8);
-    
-%     shadedErrorBar(1:length(means), means, errors, colors(subj,:), 1);
-    
-    plot(1:length(accuracy_mean{subj}), cell2mat(accuracy_mean{subj}), 'color', colors(subj,:), 'linewidth', 2);
-%     errorbar(1:length(accuracy_mean{subj}), cell2mat(accuracy_mean{subj}), cell2mat(accuracy_mean{subj})-cell2mat(accuracy_low{subj}), cell2mat(accuracy_high{subj})-cell2mat(accuracy_mean{subj}), 'color', colors(subj,:));
-    
-    accuracy_vector{subj} = cell2mat(accuracy_mean{subj});
-    
-    accuracy_first(subj) = accuracy_mean{subj}{1};
-    accuracy_last(subj) = accuracy_mean{subj}{end};
-    
-end
+plot(median(mean(accuracy_baseline_normal,3),2),'k--o', 'markerfacecolor',[0 0 0],'linewidth',1);
+plot(median(mean(accuracy_expert_normal,3),2),'k--^','markerfacecolor',[0 0 0],'linewidth',1);
 
-grid on;
-% legend(subjects, 'location','SE');
-xlabel('Trial (One Participant)');
-ylabel('Accuracy on All Other Participants');
-set(gca, 'xtick', 1:5);
+plot([1 13], [.5 .5], ':k');
 
-subplot (1,3,3);
-hold on;
-for subj=1:length(accuracy_mean),
-    plot([accuracy_first(subj) accuracy_last(subj)], 'color', colors(subj,:), 'linewidth',2);
-end
+l = legend('Baseline Model / Fake Data','Expert Model / Fake Data', ...
+    'Baseline Model / Normal Data','Expert Model / Normal Data', 'Chance Level', ...
+    'location', 'northoutside');
+set(l, 'fontsize', 10);
 
-plot([mean(accuracy_first) mean(accuracy_last)], 'color', [.75 .75 .75], 'linewidth', 5);
-text(1, mean(accuracy_first), sprintf('%.2f',mean(accuracy_first)),'horizontalalignment','right','fontweight','bold');
-text(2, mean(accuracy_last), sprintf('%.2f',mean(accuracy_last)),'fontweight','bold');
+shadedErrorBar(1:13, median(mean(accuracy_baseline_cheating,3),2),std(mean(accuracy_baseline_cheating,3),1,2), '-o', 2);
+shadedErrorBar(1:13, median(mean(accuracy_expert_cheating,3),2),std(mean(accuracy_expert_cheating,3),1,2), '-^', 2);
 
-set(gca, 'xtick', [1 2], 'xticklabel', {'start','end'});
-set(gca, 'yticklabel', []);
-set(gca, 'ygrid', 'on');
+xlim([1 13]);
+set(gca, 'xtick', 1:13);
 
-load('accuracy_cross_subject_loocv.mat');
-accuracy_before(7) = [];
-accuracy_after(7) = [];
+xlabel('Number of Training Subjects','fontsize',14);
+ylabel('Accuracy','fontsize',14);
+
 h = figure(2);
-set(h, 'position', [504   444   393   504]);
+set(h, 'position', [0  0  653  434]);
 hold on;
-for subj = 1:length(accuracy_before),
-    plot([accuracy_before(subj) accuracy_after(subj)], 'color', colors(subj,:), 'linewidth', 3);
+k = 0;
+colors = parula(14);
+
+for i=randsample(1:14,14),
+    k = k+1;
+    plot(100*(mean(accuracy_expert_cheating(:,i,:),3)-mean(accuracy_baseline_cheating(:,i,:),3)),'color',[.5 .5 .5]);%colors(k,:)); 
 end
-plot([mean(accuracy_before) mean(accuracy_after)], '--', 'color', [.75 .75 .75], 'linewidth', 5);
-text(1, mean(accuracy_before), sprintf('%.2f',mean(accuracy_before)),'horizontalalignment','right','fontweight','bold');
-text(2, mean(accuracy_after), sprintf('%.2f',mean(accuracy_after)),'fontweight','bold');
-set(gca, 'xtick', [1 2], 'xticklabel', {'start','end'});
-set(gca, 'ygrid', 'on');
-% legend(subjects);
+plot(100*mean(mean(accuracy_expert_cheating,3)-mean(accuracy_baseline_cheating,3),2),'k','linewidth',2);
+errorbar(1:13, 100*mean(mean(accuracy_expert_cheating,3)-mean(accuracy_baseline_cheating,3),2), ...
+    std(100*(mean(accuracy_expert_cheating,3)-mean(accuracy_baseline_cheating,3))/sqrt(14),1,2),'k');
+xlim([.5 13.5]);
+set(gca, 'xtick', 1:13);
+xlabel('Number of Training Subjects','fontsize',12);
+ylabel('Accuracy Difference % (Expert - Baseline)','fontsize',12);
+% legend('S1','S2','S3','S4','S5','S6','S7','S8','S9','S10','S11','S12','S13','S14',...
+%     'location', 'eastoutside');
+

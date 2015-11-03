@@ -4,6 +4,10 @@ close all;
 load('accuracy_1_13_paper.mat');
 
 accuracy_expert(:,7,:) = [];
+precision_sit(:,7,:) = [];
+precision_walk(:,7,:) = [];
+recall_sit(:,7,:) = [];
+recall_walk(:,7,:) = [];
 
 fprintf('Accuracy (LOSI/LOSO)\n');
 disp(median(mean(accuracy_expert,3),2));
